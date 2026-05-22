@@ -1,90 +1,93 @@
-# RedMagic 11 Pro (NX809J) - Guia de Compilação e Inicialização do Kernel
+# RedMagic 11 Pro (NX809J) - Kernel Compilation and Boot Guide
 
-Este guia explica como compilar, empacotar e inicializar o kernel customizado com suporte a **KernelSU-Next** e **Paridade Binária** via memória RAM (sem alterar permanentemente as partições do celular), além de definir as próximas etapas de desenvolvimento.
+> [!NOTE]
+> Para a versão em português deste guia, consulte o arquivo [README_PT.md](README_PT.md).
+
+This guide explains how to compile, pack, and boot the custom kernel with **KernelSU-Next** and **Binary Parity** support via RAM (without permanently flashing the phone's partitions), and outlines the next steps for project development.
 
 ---
 
-## 📋 Pré-requisitos
+## 📋 Prerequisites
 
-Para que a compilação e o empacotamento funcionem corretamente, você deve providenciar os seguintes componentes (que estão configurados no `.gitignore` para manter o repositório limpo):
+To ensure compilation and packaging work correctly, you must supply the following components (which are configured in `.gitignore` to keep the repository clean):
 
-1. **Toolchain Clang (r536225)**:
-   - Baixe a versão do Clang do AOSP (revision `r536225`).
-   - Extraia a toolchain na raiz deste repositório em uma pasta chamada `clang-r536225/` (de modo que o binário principal fique em `clang-r536225/bin/clang`).
-   - Alternativamente, você pode definir a variável de ambiente `CLANG_DIR` apontando para o seu diretório do Clang antes de compilar.
+1. **Clang Toolchain (r536225)**:
+   - Download the AOSP Clang toolchain (revision `r536225`).
+   - Extract it to the root of this repository in a folder named `clang-r536225/` (such that the main binary is located at `clang-r536225/bin/clang`).
+   - Alternatively, you can set the `CLANG_DIR` environment variable pointing to your Clang directory before compiling.
 
 2. **Device Tree Blob (`dtb.img`)**:
-   - Extraia o arquivo `dtb.img` oficial a partir da partição/imagem de boot (`boot.img`) de estoque da ZTE (versão userdebug correspondente).
-   - Coloque o arquivo `dtb.img` diretamente na raiz deste repositório. Ele é necessário para concatenar os Device Trees à imagem do kernel durante o empacotamento.
+   - Extract the official `dtb.img` file from the stock ZTE boot image (`boot.img`) corresponding to your target userdebug ROM.
+   - Place the `dtb.img` file directly in the root of this repository. It is required to concatenate the Device Trees to the kernel image during packaging.
 
-3. **Dependências do Host**:
-   - Certifique-se de ter instalado os pacotes essenciais de compilação do Linux (`build-essential`, `libssl-dev`, `bison`, `flex`, `libelf-dev`, `python3`, etc.).
+3. **Host Dependencies**:
+   - Ensure your Linux machine has the essential build packages installed (`build-essential`, `libssl-dev`, `bison`, `flex`, `libelf-dev`, `python3`, etc.).
 
 ---
 
-## 🚀 1. Como Compilar e Inicializar o Kernel
+## 🚀 1. How to Compile and Boot the Kernel
 
-### Passo A: Compilar o Kernel principal e Techpacks
-Temos o script unificado [super_build.sh](super_build.sh) que configura o ambiente, aplica a defconfig da plataforma (`nx809j_defconfig`), insere as flags de segurança (CFI Permissive, KernelSU-Next) e compila os binários com a toolchain Clang apropriada.
+### Step A: Compile the Main Kernel and Techpacks
+We use the unified script [super_build.sh](super_build.sh) which sets up the environment, applies the platform defconfig (`nx809j_defconfig`), injects security flags (CFI Permissive, KernelSU-Next), and compiles the binaries with the appropriate Clang toolchain.
 
-Execute no terminal:
+Run in your terminal:
 ```bash
 ./super_build.sh
 ```
-* O kernel será compilado e a imagem resultante ficará localizada em: `kernel_platform/common/arch/arm64/boot/Image`.
+* The kernel will be compiled and the resulting image will be located at: `kernel_platform/common/arch/arm64/boot/Image`.
 
 ---
 
-### Passo B: Empacotar e Assinar a Imagem de Boot (DTB + AVB)
-Os drivers dinâmicos Qualcomm exigem a junção física dos Device Trees (`dtb.img`) no cabeçalho do kernel. O script [repack_perfect_sign.sh](repack_perfect_sign.sh) cuida do empacotamento sem ramdisk interno (tamanho exato de 64MB) e faz a assinatura criptográfica obrigatória via AVB para evitar bloqueio do bootloader.
+### Step B: Pack and Sign the Boot Image (DTB + AVB)
+Qualcomm's dynamic drivers require the physical concatenation of Device Trees (`dtb.img`) into the kernel header. The script [repack_perfect_sign.sh](repack_perfect_sign.sh) handles packaging without an internal ramdisk (exact size of 64MB) and performs the mandatory cryptographic signing via AVB to avoid bootloader lockouts.
 
-Execute:
+Run:
 ```bash
 ./repack_perfect_sign.sh
 ```
-* Isso gerará a imagem assinada pronta para boot na raiz do projeto: **`dev_reverse_perfect.img`**.
+* This will generate the signed boot image in the root of the project: **`dev_reverse_perfect.img`**.
 
 ---
 
-### Passo C: Inicializar na Memória RAM (Boot Temporário)
+### Step C: Boot in RAM (Temporary Boot)
 > [!WARNING]
-> **NUNCA execute `fastboot flash boot` ou grave esta imagem permanentemente no dispositivo durante a fase de testes.** O boot deve ser feito sempre temporariamente na RAM. Se o sistema travar ou apresentar falhas, um simples pressionar do botão Power por 10 segundos restaura o boot oficial original.
+> **NEVER run `fastboot flash boot` or flash this image permanently to your device during the testing phase.** The boot must always be loaded temporarily in RAM. If the system hangs or presents issues, simply holding the Power button for 10 seconds will restore the original official boot.
 
-1. Reinicie o smartphone no modo bootloader:
+1. Reboot your smartphone into bootloader mode:
    ```bash
    adb reboot bootloader
    ```
-2. Carregue a imagem diretamente na memória RAM usando o fastboot:
+2. Boot the image directly into RAM using fastboot:
    ```bash
    sudo fastboot boot dev_reverse_perfect.img
    ```
-   *(Insira a senha de superusuário (sudo) caso o terminal solicite privilégios de root para comunicação USB com o fastboot)*.
+   *(Enter your sudo password if the terminal prompts for root privileges to establish USB communication with fastboot).*
 
-3. O celular iniciará o Android. Após inicializado, você pode validar o kernel ativo rodando:
+3. The phone will boot into Android. Once booted, you can validate the active kernel by running:
    ```bash
    adb shell uname -a
    ```
-   Você verá a string indicando a sua compilação customizada com suporte ao **KernelSU-Next** ativo.
+   You should see the signature indicating your custom build with active **KernelSU-Next** support.
 
 ---
 
-## 🛠️ 2. Próximos Passos do Projeto
+## 🛠️ 2. Project Next Steps
 
-Agora que alcançamos a compatibilidade de paridade binária estável (onde o kernel customizado carrega e roda o sistema normalmente), podemos iniciar as tarefas específicas de desenvolvimento descritas em [NEXT_STEPS.md](NEXT_STEPS.md):
+Now that we have achieved stable binary parity compatibility (where the custom kernel loads and runs the system normally), we can begin the specific development tasks described in [NEXT_STEPS.md](NEXT_STEPS.md):
 
-### 1. Implantar e Testar os Módulos Reconstruídos (.ko)
-Como o carregamento via RAM usa as partições físicas e monta `/vendor_dlkm` do sistema original, os módulos ativos no momento são os originais da ZTE. Para colocar em execução as nossas reconstruções (com código aberto refeito via Ghidra):
-* **Método Built-in:** Modifique o `Kbuild` dos drivers que reconstruímos (como `zte_charger_policy` e `zte_led`) alterando a compilação para embutida (`obj-y` em vez de `obj-m`). Assim, eles serão compilados diretamente dentro do arquivo `Image` e carregados antes do sistema inicializar os oficiais.
+### 1. Deploy and Test Rebuilt Modules (.ko)
+Since booting via RAM uses the physical partitions and mounts `/vendor_dlkm` from the original system, the active modules at the moment are ZTE's original ones. To execute our rebuilt modules (reconstructed from Ghidra source code):
+* **Built-in Method:** Modify the `Kbuild` of the drivers we rebuilt (such as `zte_charger_policy` and `zte_led`), changing the compilation to built-in (`obj-y` instead of `obj-m`). This way, they will be compiled directly inside the `Image` file and loaded before the system initializes the official ones.
 
-### 2. Overclock da GPU para 1200MHz+
-* Extrair e descompilar o Device Tree original (`dtb.img` ou `dtbo.img`) para formato texto (`.dts`).
-* Localizar a tabela de OPPs (Operating Performance Points) da GPU Adreno 830.
-* Adicionar os steps de frequência de overclock (com os binds de tensão corretos) para atingir 1200MHz+ de forma estável.
-* Recompilar a árvore e testar via `fastboot boot`.
+### 2. GPU Overclock to 1200MHz+
+* Extract and decompile the original Device Tree (`dtb.img` or `dtbo.img`) into text format (`.dts`).
+* Locate the OPP (Operating Performance Points) table for the Adreno 830 GPU.
+* Add the overclock frequency steps (with correct voltage bindings) to achieve a stable 1200MHz+.
+* Recompile the tree and test via `fastboot boot`.
 
-### 3. Integração Completa de Outros Techpacks
-* Adaptar e compilar os módulos de toque (`touch-drivers`) para validar a interação física do painel usando nossa árvore.
-* Validar a compilação de redes móveis e conectividade (`dataipa`).
+### 3. Full Integration of Other Techpacks
+* Adapt and compile the touch modules (`touch-drivers`) to validate physical screen interaction using our tree.
+* Validate mobile network connectivity (`dataipa`).
 
-### 4. Auditoria de Travas Proprietárias e CFI
-* Monitorar os logs de pânico (`dmesg` e `console-ramoops-0`) para mapear qualquer falha de CFI (Control Flow Integrity) remanescente nos módulos carregados.
+### 4. Audit of Proprietary Locks and CFI
+* Monitor panic logs (`dmesg` and `console-ramoops-0`) to map any remaining CFI (Control Flow Integrity) failures in the loaded modules.
