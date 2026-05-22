@@ -91,3 +91,10 @@ Since booting via RAM uses the physical partitions and mounts `/vendor_dlkm` fro
 
 ### 4. Audit of Proprietary Locks and CFI
 * Monitor panic logs (`dmesg` and `console-ramoops-0`) to map any remaining CFI (Control Flow Integrity) failures in the loaded modules.
+
+---
+
+## 📬 Contact & Support
+
+If you have questions, need support, or want to collaborate on this reverse engineering project, you can reach out via email:
+📧 **idealcreativesuporte@idealcreative.com.br**

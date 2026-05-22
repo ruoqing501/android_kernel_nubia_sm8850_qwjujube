@@ -88,3 +88,10 @@ Como o carregamento via RAM usa as partições físicas e monta `/vendor_dlkm` d
 
 ### 4. Auditoria de Travas Proprietárias e CFI
 * Monitorar os logs de pânico (`dmesg` e `console-ramoops-0`) para mapear qualquer falha de CFI (Control Flow Integrity) remanescente nos módulos carregados.
+
+---
+
+## 📬 Contato e Suporte
+
+Se você tiver dúvidas, precisar de suporte ou quiser colaborar neste projeto de engenharia reversa, entre em contato por e-mail:
+📧 **idealcreativesuporte@idealcreative.com.br**
