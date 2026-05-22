@@ -1,0 +1,69 @@
+#!/bin/bash
+# super_build.sh - Compile the official ZTE kernel tree (in-tree)
+
+cd "/home/adrianojr59/Vídeos/NX809J_Android16_kernel"
+
+# Tools paths
+CLANG_DIR="/home/adrianojr59/Vídeos/NX809J_Android16_kernel/clang-r536225"
+PREBUILTS_DIR="/home/adrianojr59/Downloads/KernelNX809J/infinity_build/prebuilts/kernel-build-tools/linux-x86/bin"
+export PATH="$CLANG_DIR/bin:$PREBUILTS_DIR:$PATH"
+
+# Architecture config
+export ARCH=arm64
+export SUBARCH=arm64
+export CROSS_COMPILE=aarch64-linux-gnu-
+export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+export CLANG_TRIPLE=aarch64-linux-gnu-
+export CC=clang
+
+# ZTE/Vendor variables
+export ZTE_BOARD_NAME=qwjujube
+
+# Kernel Source Path
+KERNEL_DIR="$(pwd)/kernel_platform/common"
+
+echo "🚀 Starting Unified Build for RedMagic 11 Pro (NX809J)"
+echo "🔧 Using Clang: $CLANG_DIR"
+
+# 1. Defconfig (Base configuration)
+echo "📝 Applying nx809j_defconfig..."
+make -C $KERNEL_DIR nx809j_defconfig
+
+# Apply config overrides directly to the common/.config file
+echo "⚙️ Appending custom configuration overrides..."
+{
+    echo 'CONFIG_LOCALVERSION_AUTO=n'
+    echo 'CONFIG_CFI_CLANG=y'
+    echo 'CONFIG_CFI_PERMISSIVE=y'
+    echo 'CONFIG_KSU=y'
+    echo '# CONFIG_ARM64_BTI_KERNEL is not set'
+    echo 'CONFIG_UNWIND_TABLES=y'
+    echo 'CONFIG_UNWIND_PATCH_PAC_INTO_SCS=y'
+    echo 'CONFIG_DEBUG_INFO=y'
+    echo '# CONFIG_DEBUG_INFO_NONE is not set'
+    echo 'CONFIG_DEBUG_INFO_DWARF5=y'
+    echo 'CONFIG_DEBUG_INFO_BTF=y'
+    echo 'CONFIG_DEBUG_INFO_BTF_MODULES=y'
+    echo 'CONFIG_SCHED_CLASS_EXT=y'
+    echo 'CONFIG_EXT_GROUP_SCHED=y'
+    echo 'CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,selinux,smack,tomoyo,apparmor,ipe,bpf"'
+    echo 'CONFIG_MODVERSIONS=y'
+    echo 'CONFIG_BASIC_MODVERSIONS=y'
+    echo 'CONFIG_EXTENDED_MODVERSIONS=y'
+} >> $KERNEL_DIR/.config
+
+# Process config overrides
+echo "🔄 Updating defconfig with overrides..."
+make -C $KERNEL_DIR LLVM=1 LLVM_IAS=1 olddefconfig
+
+if [ ! -f "$KERNEL_DIR/.config" ]; then
+    echo "❌ Error: failed to generate .config"
+    exit 1
+fi
+
+# 2. Build kernel, modules, and DTBs
+echo "🛠️ Compiling Kernel, Modules, and DTBs (in-tree)..."
+make -C $KERNEL_DIR -j$(nproc) LLVM=1 LLVM_IAS=1 KBUILD_MODPOST_WARN=1 Image vmlinux modules dtbs
+
+echo "✅ Compilation finished!"
+echo "📦 Kernel Image built at: $KERNEL_DIR/arch/arm64/boot/Image"
