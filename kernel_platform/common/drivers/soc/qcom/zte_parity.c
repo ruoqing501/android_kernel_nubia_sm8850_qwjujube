@@ -25,6 +25,8 @@
 #include <linux/dma-buf.h>
 #include <soc/qcom/crm.h>
 #include <linux/soc/qcom/panel_event_notifier.h>
+#include <linux/list.h>
+#include <linux/mutex.h>
 
 #if 0
 /**
@@ -287,8 +289,32 @@ int llcc_notif_staling_inc_counter(void *p1) { return -EOPNOTSUPP; }
 EXPORT_SYMBOL(llcc_notif_staling_inc_counter);
 */
 
-#if 0
-void panel_event_notification_trigger(enum panel_event_notifier_tag tag, struct panel_event_notification *notif) { }
+struct panel_event_client {
+	enum panel_event_notifier_tag tag;
+	enum panel_event_notifier_client client_type;
+	void *panel;
+	void (*callback_func)(enum panel_event_notifier_tag tag,
+			      struct panel_event_notification *notification,
+			      void *client_data);
+	void *client_data;
+	struct list_head list;
+};
+
+static LIST_HEAD(panel_client_list);
+static DEFINE_MUTEX(panel_client_mutex);
+
+void panel_event_notification_trigger(enum panel_event_notifier_tag tag, struct panel_event_notification *notif)
+{
+	struct panel_event_client *client;
+
+	mutex_lock(&panel_client_mutex);
+	list_for_each_entry(client, &panel_client_list, list) {
+		if (client->tag == tag && client->callback_func) {
+			client->callback_func(tag, notif, client->client_data);
+		}
+	}
+	mutex_unlock(&panel_client_mutex);
+}
 EXPORT_SYMBOL(panel_event_notification_trigger);
 
 void *panel_event_notifier_register(enum panel_event_notifier_tag tag,
@@ -299,16 +325,41 @@ void *panel_event_notifier_register(enum panel_event_notifier_tag tag,
 							   void *client_data),
 				     void *client_data)
 {
-	return (void *)0xdeadbeef;
+	struct panel_event_client *client;
+
+	client = kzalloc(sizeof(*client), GFP_KERNEL);
+	if (!client)
+		return ERR_PTR(-ENOMEM);
+
+	client->tag = tag;
+	client->client_type = client_type;
+	client->panel = panel;
+	client->callback_func = callback_func;
+	client->client_data = client_data;
+
+	mutex_lock(&panel_client_mutex);
+	list_add_tail(&client->list, &panel_client_list);
+	mutex_unlock(&panel_client_mutex);
+
+	return client;
 }
 EXPORT_SYMBOL(panel_event_notifier_register);
 
 int panel_event_notifier_unregister(void *cookie)
 {
+	struct panel_event_client *client = cookie;
+
+	if (!client || IS_ERR(client))
+		return -EINVAL;
+
+	mutex_lock(&panel_client_mutex);
+	list_del(&client->list);
+	mutex_unlock(&panel_client_mutex);
+
+	kfree(client);
 	return 0;
 }
 EXPORT_SYMBOL(panel_event_notifier_unregister);
-#endif
 
 #if 0
 int qcom_clk_crmb_set_rate(struct clk *clk, u32 drv_type, u32 client_idx, u32 res_idx, u32 pwr_state, u64 rate_ab, u64 rate_ib) { return 0; }
@@ -549,10 +600,9 @@ EXPORT_SYMBOL(sysstats_unregister_kgsl_stats_cb);
 #endif
 
 /* Boot Mode */
-/*
 int zte_get_boot_mode(void) { return 0; }
-EXPORT_SYMBOL(zte_get_boot_mode);
-*/
+
+u8 get_ss_panic_buf_byte(void) { return 0; }
 
 /* QTEE SHM Bridge Parity */
 #if 0

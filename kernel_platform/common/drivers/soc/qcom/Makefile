@@ -41,4 +41,5 @@ obj-$(CONFIG_QCOM_INLINE_CRYPTO_ENGINE)	+= qcom_ice.o
 obj-$(CONFIG_QCOM_PBS) +=	qcom-pbs.o
 
 obj-y += zte_parity.o
+obj-y += zte/
 

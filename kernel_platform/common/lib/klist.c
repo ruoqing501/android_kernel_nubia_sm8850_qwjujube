@@ -332,10 +332,22 @@ static struct klist_node *to_klist_node(struct list_head *n)
  */
 struct klist_node *klist_prev(struct klist_iter *i)
 {
-	void (*put)(struct klist_node *) = i->i_klist->put;
-	struct klist_node *last = i->i_cur;
+	void (*put)(struct klist_node *) = NULL;
+	struct klist_node *last;
 	struct klist_node *prev;
 	unsigned long flags;
+
+	if (unlikely(!i || !i->i_klist))
+		return NULL;
+
+	if (unlikely(!i->i_klist->k_list.next || !i->i_klist->k_list.prev)) {
+		pr_err("klist_prev: uninitialized klist %pK\n", i->i_klist);
+		dump_stack();
+		return NULL;
+	}
+
+	put = i->i_klist->put;
+	last = i->i_cur;
 
 	spin_lock_irqsave(&i->i_klist->k_lock, flags);
 
@@ -348,6 +360,10 @@ struct klist_node *klist_prev(struct klist_iter *i)
 
 	i->i_cur = NULL;
 	while (prev != to_klist_node(&i->i_klist->k_list)) {
+		if (unlikely(!prev || (unsigned long)prev < 4096 || (unsigned long)prev >= (unsigned long)-4096)) {
+			pr_err("klist_prev: invalid/NULL prev pointer %pK in klist %pK\n", prev, i->i_klist);
+			break;
+		}
 		if (likely(!knode_dead(prev))) {
 			kref_get(&prev->n_ref);
 			i->i_cur = prev;
@@ -374,10 +390,22 @@ EXPORT_SYMBOL_GPL(klist_prev);
  */
 struct klist_node *klist_next(struct klist_iter *i)
 {
-	void (*put)(struct klist_node *) = i->i_klist->put;
-	struct klist_node *last = i->i_cur;
+	void (*put)(struct klist_node *) = NULL;
+	struct klist_node *last;
 	struct klist_node *next;
 	unsigned long flags;
+
+	if (unlikely(!i || !i->i_klist))
+		return NULL;
+
+	if (unlikely(!i->i_klist->k_list.next || !i->i_klist->k_list.prev)) {
+		pr_err("klist_next: uninitialized klist %pK\n", i->i_klist);
+		dump_stack();
+		return NULL;
+	}
+
+	put = i->i_klist->put;
+	last = i->i_cur;
 
 	spin_lock_irqsave(&i->i_klist->k_lock, flags);
 
@@ -390,6 +418,10 @@ struct klist_node *klist_next(struct klist_iter *i)
 
 	i->i_cur = NULL;
 	while (next != to_klist_node(&i->i_klist->k_list)) {
+		if (unlikely(!next || (unsigned long)next < 4096 || (unsigned long)next >= (unsigned long)-4096)) {
+			pr_err("klist_next: invalid/NULL next pointer %pK in klist %pK\n", next, i->i_klist);
+			break;
+		}
 		if (likely(!knode_dead(next))) {
 			kref_get(&next->n_ref);
 			i->i_cur = next;

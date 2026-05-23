@@ -329,8 +329,10 @@ static void lpass_bt_swr_ssr_disable(struct device *dev, void *data)
 	priv->dev_up = false;
 	mutex_unlock(&priv->ssr_lock);
 
-	swrm_wcd_notify(priv->swr_ctrl_data->lpass_bt_swr_pdev,
-				 SWR_DEVICE_SSR_DOWN, NULL);
+	if (priv->swr_ctrl_data) {
+		swrm_wcd_notify(priv->swr_ctrl_data->lpass_bt_swr_pdev,
+					 SWR_DEVICE_SSR_DOWN, NULL);
+	}
 
 }
 
@@ -374,8 +376,10 @@ static int lpass_bt_swr_ssr_enable(struct device *dev, void *data)
 	}
 	mutex_unlock(&priv->swr_clk_lock);
 
-	swrm_wcd_notify(priv->swr_ctrl_data->lpass_bt_swr_pdev,
-				 SWR_DEVICE_SSR_UP, NULL);
+	if (priv->swr_ctrl_data) {
+		swrm_wcd_notify(priv->swr_ctrl_data->lpass_bt_swr_pdev,
+					 SWR_DEVICE_SSR_UP, NULL);
+	}
 
 	return 0;
 }
