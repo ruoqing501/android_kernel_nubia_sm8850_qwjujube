@@ -1,20 +1,20 @@
 __int64 __fastcall syna_hw_interface_init(__int64 a1, __int64 a2, __int64 a3)
 {
-  unsigned int v3; // w0
   __int64 v4; // x2
   unsigned int v5; // w19
   void *v6; // x0
+  struct platform_device *pdev;
 
   printk(unk_348D8, "syna_hw_interface_init", a3);
-  v3 = platform_device_register(&syna_spi_device);
-  if ( (v3 & 0x80000000) != 0 )
+  pdev = platform_device_register_simple("syna_dev_platform", -1, NULL, 0);
+  if ( IS_ERR(pdev) )
   {
-    v5 = v3;
+    v5 = PTR_ERR(pdev);
     v6 = unk_336E1;
   }
   else
   {
-    p_device = (__int64)&syna_spi_device;
+    p_device = (__int64)pdev;
     v5 = _spi_register_driver(THIS_MODULE, &syna_spi_driver);
     if ( (v5 & 0x80000000) == 0 )
     {
