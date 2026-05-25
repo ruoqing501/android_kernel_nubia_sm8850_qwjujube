@@ -52,11 +52,15 @@ All parameters have been centralized in the `super_build.sh` automation script l
 ```
 
 > [!NOTE]
-> **What does `super_build.sh` do under the hood?**
-> 1. Exports the necessary environment variables (`ARCH=arm64`, `CROSS_COMPILE`, etc.) and points to the local Clang toolchain.
-> 2. Applies the base configuration of the ZTE (`nx809j_defconfig`).
-> 3. Appends critical custom overrides (such as enabling **KernelSU-Next** via `CONFIG_KSU=y`, enabling CFI, and enabling extended modversions).
-> 4. Executes the parallel build: `make -j$(nproc) LLVM=1 LLVM_IAS=1 Image modules dtbs`.
+> **What does `super_build.sh` do under the hood and why does it inject configs?**
+> ZTE does not provide or expose a complete configuration file containing advanced debug options, CFI settings, and custom modules (like KernelSU) in their base `defconfig`. Trying to modify the `.config` file manually is fragile because it gets overwritten during clean cycles.
+> 
+> To bypass this, `super_build.sh` performs a dynamic injection:
+> 1. It exports key build environment variables (`ARCH=arm64`, `CROSS_COMPILE`, etc.) pointing to the local Clang.
+> 2. It applies the official base configuration (`nx809j_defconfig`).
+> 3. **Config Injection:** It appends critical overrides directly to the generated `.config` (enabling **KernelSU-Next** via `CONFIG_KSU=y`, enabling `CONFIG_CFI_CLANG=y` for security, forcing extended modversions, and enabling BTF debugging).
+> 4. It executes `make olddefconfig` to resolve dependencies cleanly.
+> 5. Finally, it compiles everything in parallel: `make -j$(nproc) LLVM=1 LLVM_IAS=1 Image modules dtbs`.
 
 * Once the build completes, the compiled kernel image is located at:
   `kernel_platform/common/arch/arm64/boot/Image`

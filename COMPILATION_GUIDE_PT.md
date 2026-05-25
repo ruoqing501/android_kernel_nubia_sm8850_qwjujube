@@ -52,11 +52,15 @@ Tudo foi centralizado no script de automação `super_build.sh` localizado na ra
 ```
 
 > [!NOTE]
-> **O que o `super_build.sh` faz nos bastidores?**
-> 1. Configura as variáveis de ambiente necessárias (`ARCH=arm64`, `CROSS_COMPILE`, etc.) e define o uso do compilador Clang local.
-> 2. Aplica as configurações do ZTE (`nx809j_defconfig`).
-> 3. Aplica overrides customizados essenciais (como ativar o **KernelSU-Next** via `CONFIG_KSU=y`, suporte a CFI e extended modversions).
-> 4. Executa o build paralelo: `make -j$(nproc) LLVM=1 LLVM_IAS=1 Image modules dtbs`.
+> **O que o `super_build.sh` faz nos bastidores e por que injetamos configurações?**
+> A ZTE não fornece ou expõe um arquivo de configuração completo com opções avançadas de debug, suporte a CFI e módulos customizados (como o KernelSU) no seu `defconfig` de base. Modificar manualmente o arquivo `.config` gerado é frágil, pois ele é apagado a cada ciclo de limpeza (`make clean`).
+> 
+> Para contornar essa ocultação, o script `super_build.sh` realiza uma injeção dinâmica genial:
+> 1. Configura as variáveis de ambiente necessárias (`ARCH=arm64`, `CROSS_COMPILE`, etc.) e define o compilador Clang local.
+> 2. Aplica as configurações oficiais de base do ZTE (`nx809j_defconfig`).
+> 3. **Injeção de Configurações:** Anexa diretamente as chaves e overrides cruciais ao arquivo `.config` gerado (ativando o **KernelSU-Next** via `CONFIG_KSU=y`, ativando integridade `CONFIG_CFI_CLANG=y`, forçando extended modversions e ativando depuração via BTF).
+> 4. Executa `make olddefconfig` para resolver todas as dependências de forma limpa e segura.
+> 5. Por fim, executa a compilação paralela: `make -j$(nproc) LLVM=1 LLVM_IAS=1 Image modules dtbs`.
 
 * Ao final da compilação, o kernel principal compilado estará gerado em:
   `kernel_platform/common/arch/arm64/boot/Image`
