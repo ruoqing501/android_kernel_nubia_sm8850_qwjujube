@@ -3,7 +3,8 @@ echo "Aguardando conexão ADB..."
 adb wait-for-device
 echo "Dispositivo detectado! Coletando arquivos de /sys/fs/pstore/..."
 
-OUT_DIR="/home/adrianojr59/Vídeos/NX809J_Android16_kernel/scratch"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+OUT_DIR="$SCRIPT_DIR"
 mkdir -p "$OUT_DIR"
 
 echo "=== Lista de arquivos ===" > "$OUT_DIR/ramoops.log"

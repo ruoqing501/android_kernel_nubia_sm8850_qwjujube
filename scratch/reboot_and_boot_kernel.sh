@@ -9,7 +9,7 @@ adb reboot bootloader
 echo "⏳ Waiting for device in fastboot mode..."
 # Loop until fastboot devices shows the device
 while true; do
-    if fastboot devices | grep -q "9125319102E9"; then
+    if fastboot devices | grep -q "."; then
         echo "✅ Device detected in fastboot mode!"
         break
     fi
