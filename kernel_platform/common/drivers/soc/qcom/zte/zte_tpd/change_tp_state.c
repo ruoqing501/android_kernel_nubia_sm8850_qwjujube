@@ -33,25 +33,25 @@ void change_tp_state(int state)
             // Do nothing
         } else if (state == 2) {
             current_lcd_state = 0;
-            queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9c0));
+            queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9c0));
             ufp_tp_ops.field_8 = 0;
         } else if (state == 3) {
             current_lcd_state = 1;
             ufp_tp_ops.field_8 = 0;
             *(int *)((char *)&ufp_tp_ops + 128) = 0;
-            queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
+            queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
         } else {
             pr_err("tpd_ufp_err: ignore err lcd change\n");
         }
     } else if (current_lcd_state == 1) {
         if (state == 2) {
             current_lcd_state = 0;
-            queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9c0));
+            queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9c0));
             ufp_tp_ops.field_8 = 0;
         } else if (state == 1) {
             current_lcd_state = 2;
             ufp_tp_ops.field_8 = 0;
-            queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
+            queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
         } else {
             pr_err("tpd_ufp_err: ignore err lcd change\n");
         }
@@ -60,17 +60,17 @@ void change_tp_state(int state)
             current_lcd_state = 1;
             ufp_tp_ops.field_8 = 0;
             *(int *)((char *)&ufp_tp_ops + 128) = 0;
-            queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
+            queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
         } else if (state == 1) {
             current_lcd_state = 2;
             ufp_tp_ops.field_8 = 0;
-            queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
+            queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9a0));
         } else {
             pr_err("tpd_ufp_err: ignore err lcd change\n");
         }
     } else {
         current_lcd_state = 0;
-        queue_work_on(32, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9c0));
+        queue_work_on(WORK_CPU_UNBOUND, *(struct workqueue_struct **)(tpd_cdev + 0x4b0), (struct work_struct *)(tpd_cdev + 0x9c0));
         ufp_tp_ops.field_8 = 0;
         pr_err("tpd_ufp_err: err lcd light change\n");
     }
