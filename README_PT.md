@@ -151,6 +151,7 @@ Como este projeto foi desenhado para testes via `fastboot boot` (executando um k
 
 #### 1. Drivers Compilados a partir do Código Aberto nesta Árvore:
 *   **Touchscreen (`zte_tpd.ko`):** Reconstruído dinamicamente como módulo modular (`obj-m`), otimizado com alocação dinâmica oficial de plataforma e agendamentos unbound para evitar pânicos de CPU e watchdog.
+    *   **Como é carregado e roda:** Como a partição `/vendor_dlkm` física original do celular é montada como somente leitura (Read-Only), o driver customizado `zte_tpd.ko` é carregado no aparelho usando o **KernelSU-Next**. O arquivo compilado é copiado para `/data/adb/modules/zte_tpd_only/vendor_dlkm/lib/modules/zte_tpd.ko`. Durante a inicialização, o KernelSU integrado no nosso kernel faz o bind-mount (overlay) deste arquivo por cima da partição `/vendor_dlkm` física. Assim, o Android carrega nossa versão corrigida em vez da original de fábrica.
 *   **Drivers Centrais ZTE:** Todos os 11 drivers listados sob `obj-y` (`zte_misc`, `zte_led`, `zte_fingerprint`, `zte_charger_policy`, etc.) são compilados e embutidos diretamente no executável `Image` estático.
 *   **KernelSU-Next:** Integrado e embutido nativamente no kernel estático.
 *   **Stubs de Compatibilidade (`zte_parity.c`):** Mantém a paridade de ABI expondo stubs para os símbolos exigidos pelos módulos proprietários da Qualcomm.
