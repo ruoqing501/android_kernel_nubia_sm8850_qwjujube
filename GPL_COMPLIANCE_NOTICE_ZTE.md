@@ -109,9 +109,21 @@ This SCMI timeout prevents CPUSS telemetry from probing, which stalls the remote
 
 ---
 
+### 8. Industry Precedents and Market Standards (OEM Compliance)
+To prevent any ambiguity regarding the obligation to release the full source code for kernel-space drivers (including in-house or custom-tailored drivers for touchscreens, power management, and battery policies), we highlight that other leading manufacturers who distribute Android devices powered by the Linux kernel regularly publish their complete kernel-space sources in public repositories:
+* **Xiaomi (MiCode):** Publishes on GitHub the full source code for touch screen drivers (Goodix, Synaptics, Focaltech), charge controllers, and battery management of their flagship devices without omissions or stubs.
+* **OnePlus / OPPO / Realme (OnePlusOSS):** Deliver full compilable kernel trees, including complete source code for proprietary charging policies (e.g., Warp/VOOC charging) and touch panel drivers.
+* **Samsung (Samsung Open Source):** Releases through its official portal (`opensource.samsung.com`) all custom drivers and configs for both Exynos and Qualcomm chips for strict GPL compliance.
+* **Motorola / Lenovo (MotorolaMobilityLLC):** Publishes fully compilable, functional kernel source trees on GitHub containing all necessary platform modules.
+
+ZTE's omission of these critical kernel-space drivers and configuration fragments places the RedMagic 11 Pro in direct non-compliance with both industry standards and the legally binding terms of the GPLv2.
+
+---
+
 ## 🎯 REQUIRED REMEDY
 
 To achieve full GPL compliance, ZTE must release a complete and compilable source code package that includes:
 1. All original C source files for the out-of-tree directories (`wlan/`, `mmrm-driver/`, `synx-kernel/`, `zte-drivers/`).
 2. The platform compilation configuration files (`canoe.fragment` and platform-specific defconfigs).
 3. The necessary core kernel header declarations to support dynamic linking and loadable module execution without restrictive KCFI type mismatches.
+

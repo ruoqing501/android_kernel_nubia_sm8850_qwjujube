@@ -109,9 +109,21 @@ Este timeout do SCMI trava a subida do ADSP/CDSP (remoteproc), o que consequente
 
 ---
 
+### 8. Precedentes da Indústria e Padrão de Mercado (Compliance de Outros Fabricantes)
+Para evitar quaisquer dúvidas quanto à obrigatoriedade da entrega do código-fonte completo dos drivers de kernel (incluindo aqueles desenvolvidos in-house ou sob medida para controladores de toque, carregamento e energia), ressaltamos que outros fabricantes líderes do setor que distribuem dispositivos Android baseados no Linux Kernel disponibilizam rotineiramente a totalidade de seus fontes de kernel-space em repositórios públicos:
+* **Xiaomi (MiCode):** Disponibiliza no GitHub todo o código-fonte dos drivers de tela (Goodix, Synaptics, Focaltech), gerenciamento de carga/bateria e conectividade de seus flagships sem qualquer omissão ou uso de stubs.
+* **OnePlus / OPPO / Realme (OnePlusOSS):** Fornecem árvores de kernel completas que compilam nativamente, incluindo o código-fonte completo das políticas de carregamento proprietárias (ex: VOOC/Warp Charge) e drivers de toque específicos.
+* **Samsung (Samsung Open Source):** Publica através de seu portal oficial (`opensource.samsung.com`) todos os drivers de kernel e configurações exatas de seus chips Exynos e Qualcomm para fins de conformidade estrita da GPL.
+* **Motorola / Lenovo (MotorolaMobilityLLC):** Disponibilizam árvores de código-fonte de kernel funcionais no GitHub com todos os commits e módulos de plataforma necessários para a compilação completa.
+
+A recusa ou omissão dessas partes do software em espaço de kernel por parte da ZTE coloca o RedMagic 11 Pro em desconformidade direta com as práticas aceitas do ecossistema e com os termos da licença GPL v2.
+
+---
+
 ## 🎯 RESOLUÇÃO EXIGIDA
 
 Solicitamos formalmente que a ZTE forneça o **pacote completo do código-fonte e suas receitas de compilação**, compreendendo:
 1. Todos os diretórios e repositórios out-of-tree (`wlan/`, `mmrm-driver/`, `synx-kernel/`, `zte-drivers/`) contendo o código-fonte em linguagem C original (e não binários compilados stubs ou .ko fechados).
 2. O arquivo de configuração de compilação completo (`canoe.fragment` e/ou `canoe_defconfig`) que reflita exatamente o binário operacional empacotado nos celulares RedMagic 11 Pro de produção.
 3. A correção estrutural de cabeçalhos do kernel principal para garantir que os módulos possam ser montados e linkados dinamicamente via modpost sem warnings de CFI restritivos ou assinaturas de tipos corrompidos.
+
