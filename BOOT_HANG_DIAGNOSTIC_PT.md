@@ -2,7 +2,7 @@
 
 > **Status:** Em investigação ativa — Ajuda da comunidade é bem-vinda!
 >
-> **Device:** Nubia RedMagic 11 Pro (NX809J) — Snapdragon 8 Elite (SM8750/Canoe)
+> **Device:** Nubia RedMagic 11 Pro (NX809J) — Snapdragon 8 Elite (SM8850/Canoe)
 >
 > **Kernel Base:** GKI 6.12.23-android16 com KernelSU-Next
 >

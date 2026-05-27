@@ -3,7 +3,7 @@
 **Para:** ZTE Corporation / Nubia Technology Support & Compliance Department  
 **Assunto:** Solicitação Formal do Código-Fonte Completo e Correspondente do Kernel do RedMagic 11 Pro (NX809J) — Em conformidade com a GNU General Public License v2 (GPLv2)  
 **Dispositivo:** Nubia RedMagic 11 Pro (Model: NX809J)  
-**Processador (SoC):** Qualcomm Snapdragon 8 Elite / Gen 5 (SM8750/SM8850 - Codenames: `canoe` / `qwjujube`)  
+**Processador (SoC):** Qualcomm Snapdragon 8 Elite / Gen 5 (SM8850 - Codenames: `canoe` / `qwjujube`)  
 **Versão do Kernel:** Linux Kernel 6.12.23 (Android 16 GKI)  
 
 ---
@@ -31,7 +31,7 @@
 Abaixo estão detalhados os componentes indispensáveis que estão ausentes ou corrompidos na liberação atual de código da ZTE:
 
 ### 1. Ausência do Fragmento de Configuração da Plataforma (Platform Defconfig)
-* **Arquivo Ausente:** `canoe.fragment` (ou o arquivo equivalente de configuração da placa/plataforma para a SoC SM8750/SM8850).
+* **Arquivo Ausente:** `canoe.fragment` (ou o arquivo equivalente de configuração da placa/plataforma para a SoC SM8850).
 * **Localização Esperada:** `kernel_platform/common/arch/arm64/configs/`
 * **Impacto:** Ao compilar apenas com a configuração padrão do Android GKI (`gki_defconfig`), todos os drivers de plataforma específicos da Qualcomm (como SCM - Secure Channel Manager, SMMU, reguladores de tensão, controladores de clock RPMH e conexões de barramento) permanecem desativados. Isso impossibilita a compilação e o carregamento de **194 módulos de plataforma cruciais** que constam na imagem oficial do smartphone.
 

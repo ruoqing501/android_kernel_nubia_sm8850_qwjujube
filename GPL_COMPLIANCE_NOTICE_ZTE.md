@@ -3,7 +3,7 @@
 **To:** ZTE Corporation / Nubia Technology Support & Compliance Department  
 **Subject:** Formal Request for Complete and Corresponding Source Code for RedMagic 11 Pro (NX809J) Kernel — In accordance with the GNU General Public License v2 (GPLv2)  
 **Device:** Nubia RedMagic 11 Pro (Model: NX809J)  
-**SoC:** Qualcomm Snapdragon 8 Elite / Gen 5 (SM8750/SM8850 - Codenames: `canoe` / `qwjujube`)  
+**SoC:** Qualcomm Snapdragon 8 Elite / Gen 5 (SM8850 - Codenames: `canoe` / `qwjujube`)  
 **Kernel Version:** Linux Kernel 6.12.23 (Android 16 GKI)  
 
 ---
@@ -35,7 +35,7 @@
 Below is the detailed list of missing or broken components in the current ZTE NX809J source release:
 
 ### 1. Missing Platform Defconfig Fragment
-* **Missing File:** `canoe.fragment` (or equivalent board-level configuration fragment for SM8750/SM8850).
+* **Missing File:** `canoe.fragment` (or equivalent board-level configuration fragment for SM8850).
 * **Expected Path:** `kernel_platform/common/arch/arm64/configs/`
 * **Impact:** Compiling with the default `gki_defconfig` disables all Qualcomm SoC-level platform drivers (such as SCM, SMMU, RPMH, regulators, clock controllers, and interconnects). This prevents the compilation of approximately **194 platform-level modules** loaded by the official firmware.
 
